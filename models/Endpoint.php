@@ -12,14 +12,43 @@ class Endpoint
         $this->x = $x;
         $this->y = $y;
         $this->N = $N;
+
+        $this->buildFiend();
+        $this->showMap();
     }
 
-    public function buildFiend()
+    private function buildFiend()
     {
-        $map = array($this->x, $this->y);
-        echo 'Построена карта с размерами, x: ' . $this->x . ', y: ' . $this->y;
+        $this->map = array_fill(0, $this->x, array_fill(0, $this->y, 1));
+        echo 'Построена карта с размерами, x: ' . $this->x . ', y: ' . $this->y . '<br>';
     }
 
+    private function showMap()
+    {
+        echo '<br>';
+        for ($i = 0; $i < $this->x; $i++)
+        {
+            for ($k = 0; $k < $this->y; $k++)
+            {
+                print_r($this->map[$i][$k]);
+            }
+            echo '<br>';
+        }
+    }
+
+    public function addAnimal($coordinateX, $coordinateY, $type)
+    {
+        if ($type === 'Заяц')
+        {
+            $this->map[$coordinateX][$coordinateY] = 0;
+        }
+
+        if ($type === 'Волк')
+        {
+            $this->map[$coordinateX][$coordinateY] = 'X';
+        }
+        echo 'Карта после изменений' . $this->showMap();
+    }
 
     /**
      * Показать параметры класса
@@ -33,6 +62,6 @@ class Endpoint
     }
 }
 
-$endpoint =  new Endpoint(5, 5, 5);
-$endpoint->showParam(); // для отладки
-$endpoint->buildFiend();
+$endpoint =  new Endpoint(15, 15, 5);
+$endpoint->addAnimal(0,0,'Заяц');
+$endpoint->addAnimal(3,6,'Волк');
