@@ -136,7 +136,7 @@ class Endpoint
             {
                 if ($value === 'X' || $value === '0') {
                     $this->checkAvailableDirections($vertical, $horizontal, $value);
-//                    $this->showMap(); Для пошагового разбора движений каждого животного
+                    $this->showMap(); //Для пошагового разбора движений каждого животного
                 }
             }
         }
@@ -151,10 +151,14 @@ class Endpoint
             'bottom' => $bottom,
         ];
 
-        foreach ($listDirection as $direction)
+        print_r($listDirection); echo "<br>";
+
+        foreach ($listDirection as $key => $direction)
         {
-            if ($direction === 0) unset($direction);
+            if ($direction == 0) unset($listDirection[$key]);
         }
+
+        print_r($listDirection);
 
         $moveDirection = array_rand($listDirection); // string с названием ключа
         if ($moveDirection === 'left') $this->moveAnimalToLeft($x, $y, $animal);
@@ -177,18 +181,21 @@ class Endpoint
 
     private function lookAvailableLeftDirection($x, $y)
     {
+        if (!isset($this->map[$x][$y-1])) return 0;
         if ($this->map[$x][$y-1] !== 'X' && $this->map[$x][$y-1] !== '0') return 1;
         else return 0;
     }
 
     private function lookAvailableRightDirection($x, $y)
     {
+        if (!isset($this->map[$x][$y+1])) return 0;
         if ($this->map[$x][$y+1] !== 'X' && $this->map[$x][$y+1] !== '0') return 1;
         else return 0;
     }
 
     private function lookAvailableTopDirection($x, $y)
     {
+        if (!isset($this->map[$x-1][$y])) return 0;
         if ($this->map[$x-1][$y] !== 'X' && $this->map[$x-1][$y] !== '0') return 1;
         else return 0;
     }
@@ -282,7 +289,9 @@ $endpoint =  new Endpoint(6, 6, 5);
 $endpoint->addAnimal(3,1,'Заяц');
 $endpoint->addAnimal(3,2,'Заяц');
 $endpoint->addAnimal(5,3,'Волк');
+$endpoint->showMap();
 //$endpoint->randAddAnimal(6, 'Заяц');
 //$endpoint->randAddAnimal(6, 'Волк');
 //$endpoint->moveAtRand();
 $endpoint->makeMove();
+$endpoint->showMap();
