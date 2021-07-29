@@ -5,6 +5,10 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        * {
+            font-family: "Calibri Light", monospace; font-size: 24pt;}
+    </style>
     <title>Тестовое задание Smart World</title>
 </head>
 <body>
