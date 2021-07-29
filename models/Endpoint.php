@@ -68,7 +68,7 @@ class Endpoint
             $coordinateY = rand(0, $this->y);
 
             if ($type === 'Заяц') {
-                $this->map[$coordinateX][$coordinateY] = 0;
+                $this->map[$coordinateX][$coordinateY] = '0';
             }
 
             if ($type === 'Волк') {
@@ -79,53 +79,90 @@ class Endpoint
         }
     }
 
-    /**
-     * Случайное перемещение действующего лица на 1 в любую сторону, приоритет хода за волком
-     * Не проверяет нижние границы
-     */
-    public function moveAtRand()
+    private function eatHareIfPossible($x, $y)
     {
-        $this->checkIsAte();
-        foreach ($this->map as $vertical => $arr_y) {
-            foreach ($arr_y as $horizontal => $value) {
-                if ($value === 'X' || $value === '0') {
-                    $ch = rand(0, 3);
-                    switch ($ch) {
-                        case 0: // Вверх
-                            $this->map[$vertical][$horizontal] = '1';
-                            if ($vertical > 0) {
-                                if ($value === 'X' && $this->map[$vertical - 1][$horizontal] !== 'X') { $this->map[$vertical - 1][$horizontal] = 'X'; $this->logMoves(0); }
-                                    else { $this->map[$vertical + 1][$horizontal] = 'X'; $this->logMoves(1);} // если сверху занято другим, то пойти вниз
-                                if ($value === '0' && $this->map[$vertical - 1][$horizontal] !== '0') { $this->map[$vertical - 1][$horizontal] = '0'; $this->logMoves(0);}
-                                    else { $this->map[$vertical + 1][$horizontal] = '0'; $this->logMoves(1);}// если сверху занято другим, то пойти вниз
-                            } elseif ($value === 'X') { $this->map[$vertical + 1][$horizontal] = 'X'; $this->logMoves(1);}
-                            elseif ($value === '0') { $this->map[$vertical + 1][$horizontal] = '0'; $this->logMoves(1);}
-                            break;
-                        case 1: // Вниз
-                            $this->map[$vertical][$horizontal] = '1';
-                            if ($value === 'X' && $this->map[$vertical + 1][$horizontal] !== 'X') $this->map[$vertical + 1][$horizontal] = 'X';
-                                else
-                            if ($value === '0') $this->map[$vertical + 1][$horizontal] = '0';
-                            break;
-                        case 2: // Влево
-                            $this->map[$vertical][$horizontal] = '1';
-                            if ($horizontal != 0) {
-                                if ($value === 'X') $this->map[$vertical][$horizontal - 1] = 'X';
-                                if ($value === '0') $this->map[$vertical][$horizontal - 1] = '0';
-                            } elseif ($value === 'X') $this->map[$vertical][$horizontal + 1] = 'X';
-                            elseif ($value === '0') $this->map[$vertical][$horizontal + 1] = '0';
-                            break;
-                        case 3: // Вправо
-                            $this->map[$vertical][$horizontal] = '1';
-                            if ($value === 'X') $this->map[$vertical][$horizontal + 1] = 'X';
-                            if ($value === '0' && $this->map[$vertical][$horizontal + 1] !== '0') $this->map[$vertical][$horizontal + 1] = '0';
-                                else $this->map[$vertical][$horizontal - 1] = '0'; // если справа занято, пойти влево
-                            break;
-                    }
-                }
-            }
-        }
-        $this->checkIsAte();
+        $sum = 0;
+
+        if ($this->lookHareLeft($x, $y)) $sum++;
+        if ($this->lookHareRight($x, $y)) $sum++;
+        if ($this->lookHareTop($x, $y)) $sum++;
+        if ($this->lookHareBottom($x, $y)) $sum++;
+        if ($this->lookHareTopLeft($x, $y)) $sum++;
+        if ($this->lookHareTopRight($x, $y)) $sum++;
+        if ($this->lookHareBottomLeft($x, $y)) $sum++;
+        if ($this->lookHareBottomRight($x, $y)) $sum++;
+
+        if ($sum > 0 && $sum < 2) $this->eatHare($x, $y);
+        if ($sum > 2) echo "За $sum-мя зайцами погонишься, ни одного не поймаешь";
+    }
+
+    private function lookHareLeft($x, $y)
+    {
+        if (!isset($this->map[$x][$y-1])) return 0;
+        elseif ($this->map[$x][$y-1] === '0') return 1;
+        else return 0;
+    }
+
+    private function lookHareRight($x, $y)
+    {
+        if (!isset($this->map[$x][$y+1])) return 0;
+        elseif ($this->map[$x][$y+1] === '0') return 1;
+        else return 0;
+    }
+
+    private function lookHareTop($x, $y)
+    {
+        if (!isset($this->map[$x-1][$y])) return 0;
+        elseif ($this->map[$x-1][$y] === '0') return 1;
+        else return 0;
+    }
+
+    private function lookHareBottom($x, $y)
+    {
+        if (!isset($this->map[$x+1][$y])) return 0;
+        elseif ($this->map[$x+1][$y] === '0') return 1;
+        else return 0;
+    }
+
+    private function lookHareTopLeft($x, $y)
+    {
+        if (!isset($this->map[$x-1][$y-1])) return 0;
+        elseif ($this->map[$x-1][$y-1] === '0') return 1;
+        else return 0;
+    }
+
+    private function lookHareTopRight($x, $y)
+    {
+        if (!isset($this->map[$x-1][$y+1])) return 0;
+        elseif ($this->map[$x-1][$y+1] === '0') return 1;
+        else return 0;
+    }
+
+    private function lookHareBottomLeft($x, $y)
+    {
+        if (!isset($this->map[$x+1][$y-1])) return 0;
+        elseif ($this->map[$x+1][$y-1] === '0') return 1;
+        else return 0;
+    }
+
+    private function lookHareBottomRight($x, $y)
+    {
+        if (!isset($this->map[$x+1][$y+1])) return 0;
+        elseif ($this->map[$x+1][$y+1] === '0') return 1;
+        else return 0;
+    }
+
+    private function eatHare($x, $y)
+    {
+        $sign = '*';
+        if ($this->lookHareLeft($x, $y) == 1) $this->map[$x][$y-1] = $sign;
+        if ($this->lookHareRight($x, $y)) $this->map[$x][$y+1] = $sign;
+        if ($this->lookHareTop($x, $y)) $this->map[$x-1][$y] = $sign;
+        if ($this->lookHareBottom($x, $y)) $this->map[$x+1][$y] = $sign;
+        if ($this->lookHareTopLeft($x, $y)) $this->map[$x-1][$y-1] = $sign;
+        if ($this->lookHareTopRight($x, $y)) $this->map[$x-1][$y+1] = $sign;
+        if ($this->lookHareBottomLeft($x, $y)) $this->map[$x+1][$y-1] = $sign;
+        if ($this->lookHareBottomRight($x, $y)) $this->map[$x+1][$y+1] = $sign;
     }
 
     public function makeMove()
@@ -135,14 +172,21 @@ class Endpoint
             foreach ($arr_y as $horizontal => $value)
             {
                 if ($value === 'X' || $value === '0') {
-                    $this->checkAvailableDirections($vertical, $horizontal, $value);
+
+                    if ($value === 'X') $this->eatHareIfPossible($vertical, $horizontal);
+                    $this->checkAvailableDirections($vertical, $horizontal);
+
+                    //На данный момент перемещает каждое животное
+
+
+
                     $this->showMap(); //Для пошагового разбора движений каждого животного
                 }
             }
         }
     }
 
-    private function moveAnimalTo($left, $right, $top, $bottom, $x, $y, $animal)
+    private function moveAnimalTo($left, $right, $top, $bottom, $x, $y)
     {
         $listDirection = [
             'left' => $left,
@@ -151,23 +195,19 @@ class Endpoint
             'bottom' => $bottom,
         ];
 
-        print_r($listDirection); echo "<br>";
-
         foreach ($listDirection as $key => $direction)
         {
             if ($direction == 0) unset($listDirection[$key]);
         }
 
-        print_r($listDirection);
-
         $moveDirection = array_rand($listDirection); // string с названием ключа
-        if ($moveDirection === 'left') $this->moveAnimalToLeft($x, $y, $animal);
-        if ($moveDirection === 'right') $this->moveAnimalToRight($x, $y, $animal);
-        if ($moveDirection === 'top') $this->moveAnimalToTop($x, $y, $animal);
-        if ($moveDirection === 'bottom') $this->moveAnimalToBottom($x, $y, $animal);
+        if ($moveDirection === 'left') $this->moveAnimalToLeft($x, $y);
+        if ($moveDirection === 'right') $this->moveAnimalToRight($x, $y);
+        if ($moveDirection === 'top') $this->moveAnimalToTop($x, $y);
+        if ($moveDirection === 'bottom') $this->moveAnimalToBottom($x, $y);
     }
 
-    private function checkAvailableDirections($x, $y, $animal)
+    private function checkAvailableDirections($x, $y)
     {
         $availableLeft = $availableRight = $availableTop = $availableBottom = 0;
 
@@ -176,122 +216,84 @@ class Endpoint
         $availableTop = $this->lookAvailableTopDirection($x, $y);
         $availableBottom = $this->lookAvailableBottomDirection($x, $y);
 
-        $this->moveAnimalTo($availableLeft, $availableRight, $availableTop, $availableBottom, $x, $y, $animal);
+        $this->moveAnimalTo($availableLeft, $availableRight, $availableTop, $availableBottom, $x, $y);
     }
 
     private function lookAvailableLeftDirection($x, $y)
     {
         if (!isset($this->map[$x][$y-1])) return 0;
-        if ($this->map[$x][$y-1] !== 'X' && $this->map[$x][$y-1] !== '0') return 1;
+        elseif ($this->map[$x][$y] === 'X' && $this->map[$x][$y-1] !== 'X') return 1;
+        elseif ($this->map[$x][$y-1] !== 'X' && $this->map[$x][$y-1] !== '0') return 1;
         else return 0;
     }
 
     private function lookAvailableRightDirection($x, $y)
     {
         if (!isset($this->map[$x][$y+1])) return 0;
-        if ($this->map[$x][$y+1] !== 'X' && $this->map[$x][$y+1] !== '0') return 1;
+        elseif ($this->map[$x][$y] === 'X' && $this->map[$x][$y+1] !== 'X') return 1;
+        elseif ($this->map[$x][$y+1] !== 'X' && $this->map[$x][$y+1] !== '0') return 1;
         else return 0;
     }
 
     private function lookAvailableTopDirection($x, $y)
     {
         if (!isset($this->map[$x-1][$y])) return 0;
-        if ($this->map[$x-1][$y] !== 'X' && $this->map[$x-1][$y] !== '0') return 1;
+        elseif ($this->map[$x][$y] === 'X' && $this->map[$x-1][$y] !== 'X') return 1;
+        elseif ($this->map[$x-1][$y] !== 'X' && $this->map[$x-1][$y] !== '0') return 1;
         else return 0;
     }
 
     private function lookAvailableBottomDirection($x, $y)
     {
         if (!isset($this->map[$x+1][$y])) return 0;
-        if ($this->map[$x+1][$y] !== 'X' && $this->map[$x+1][$y] !== '0') return 1;
+        elseif ($this->map[$x][$y] === 'X' && $this->map[$x+1][$y] !== 'X') return 1;
+        elseif ($this->map[$x+1][$y] !== 'X' && $this->map[$x+1][$y] !== '0') return 1;
         else return 0;
     }
 
-    private function moveAnimalToLeft($x, $y, $animal)
+    private function moveAnimalToLeft($x, $y)
     {
+        $temp = $this->map[$x][$y];
         $this->map[$x][$y] = '*';
-        $this->map[$x][$y-1] = $animal;
+        $this->map[$x][$y-1] = $temp;
     }
 
-    private function moveAnimalToRight($x, $y, $animal)
+    private function moveAnimalToRight($x, $y)
     {
+        $temp = $this->map[$x][$y];
         $this->map[$x][$y] = '*';
-        $this->map[$x][$y+1] = $animal;
+        $this->map[$x][$y+1] = $temp;
     }
 
-    private function moveAnimalToTop($x, $y, $animal)
+    private function moveAnimalToTop($x, $y)
     {
+        $temp = $this->map[$x][$y];
         $this->map[$x][$y] = '*';
-        $this->map[$x-1][$y] = $animal;
+        $this->map[$x-1][$y] = $temp;
     }
 
-    private function moveAnimalToBottom($x, $y, $animal)
+    private function moveAnimalToBottom($x, $y)
     {
+        $temp = $this->map[$x][$y];
         $this->map[$x][$y] = '*';
-        $this->map[$x+1][$y] = $animal;
+        $this->map[$x+1][$y] = $temp;
     }
 
-    private function checkIsAte()
-    {
-        foreach ($this->map as $vertical => $arr_y)
-        {
-            foreach ($arr_y as $horizontal => $value) {
-                if ($value === '0'
-                    && isset($this->map[$vertical-1][$horizontal])
-                && isset($this->map[$vertical+1][$horizontal])
-                && isset($this->map[$vertical][$horizontal-1])
-                && isset($this->map[$vertical][$horizontal+1]) )
-                {
-                    if ($vertical != 0)
-                    {
-                        if ($this->map[$vertical-1][$horizontal] === 'X') $this->map[$vertical][$horizontal] = 'e'; //Сверху
-                        if ($this->map[$vertical-1][$horizontal-1] === 'X') $this->map[$vertical][$horizontal] = 'e'; //Диагональ вверх-влево
-                        if ($this->map[$vertical-1][$horizontal+1] === 'X') $this->map[$vertical][$horizontal] = 'e'; //Диагональ вверх-вправо
-                    }
-
-                    if ($horizontal != 0)
-                    {
-                        if ($this->map[$vertical][$horizontal-1] === 'X') $this->map[$vertical][$horizontal] = 'e'; //Влево
-                        if ($this->map[$vertical+1][$horizontal-1] === 'X') $this->map[$vertical][$horizontal] = 'e'; //Диагональ вниз-влево
-                    }
-
-                    if ($this->map[$vertical+1][$horizontal] === 'X') $this->map[$vertical][$horizontal] = 'e'; //Снизу
-
-                    if ($this->map[$vertical][$horizontal+1] === 'X') $this->map[$vertical][$horizontal] = 'e'; //Вправо
-
-                    if ($this->map[$vertical+1][$horizontal+1] === 'X') $this->map[$vertical][$horizontal] = 'e'; //Диагональ вниз-вправо
-                }
-            }
-        }
-    }
-
-    private function logMoves($direction)
-    {
-        switch ($direction)
-        {
-            case 0:
-                echo 'Ушел вверх';
-                break;
-            case 1:
-                echo 'Ушел вниз';
-                break;
-            case 2:
-                echo 'Ушел влево';
-                break;
-            case 3:
-                echo 'Ушел вправо';
-                break;
-        }
-    }
 }
 
 $endpoint =  new Endpoint(6, 6, 5);
-$endpoint->addAnimal(3,1,'Заяц');
-$endpoint->addAnimal(3,2,'Заяц');
-$endpoint->addAnimal(5,3,'Волк');
+//$endpoint->addAnimal(2,1,'Заяц');
+//$endpoint->addAnimal(2,2,'Заяц');
+//$endpoint->addAnimal(2,3,'Заяц');
+//$endpoint->addAnimal(3,3,'Заяц');
+//$endpoint->addAnimal(3,1,'Заяц');
+//$endpoint->addAnimal(4,1,'Заяц');
+//$endpoint->addAnimal(4,2,'Заяц');
+$endpoint->addAnimal(4,3,'Заяц');
+$endpoint->addAnimal(3,2,'Волк');
 $endpoint->showMap();
 //$endpoint->randAddAnimal(6, 'Заяц');
 //$endpoint->randAddAnimal(6, 'Волк');
 //$endpoint->moveAtRand();
 $endpoint->makeMove();
-$endpoint->showMap();
+//$endpoint->showMap();
