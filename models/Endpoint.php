@@ -6,7 +6,6 @@ class Endpoint
     private $x, $y, $N,
         $map;
 
-    // Методы, объявленные абстрактными, несут, по существу, лишь описательный смысл и не могут включать реализацию.
     public function __construct($x, $y, $N)
     {
         $this->x = $x;
@@ -176,10 +175,6 @@ class Endpoint
                     if ($value === 'X') $this->eatHareIfPossible($vertical, $horizontal);
                     $this->checkAvailableDirections($vertical, $horizontal);
 
-                    //На данный момент перемещает каждое животное
-
-
-
                     $this->showMap(); //Для пошагового разбора движений каждого животного
                 }
             }
@@ -294,6 +289,5 @@ $endpoint->addAnimal(3,2,'Волк');
 $endpoint->showMap();
 //$endpoint->randAddAnimal(6, 'Заяц');
 //$endpoint->randAddAnimal(6, 'Волк');
-//$endpoint->moveAtRand();
 $endpoint->makeMove();
 //$endpoint->showMap();
